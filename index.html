@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pavan Seva - Login/Sign Up</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- jsPDF CDN for client-side PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  
+  <!-- Link to external CSS file -->
+  <link rel="stylesheet" href="CSS.css"> 
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col items-center justify-center p-4">
+
+  <!-- Login Page -->
+  <section id="loginSection" class="w-full max-w-md">
+    <div class="content">
+      <div class="text">Login</div>
+      <form id="loginForm">
+        <div class="field">
+          <span>👤</span>
+          <input type="text" name="username" id="loginUsername" required autocomplete="username" />
+          <label for="loginUsername">Username</label>
+        </div>
+        <div class="field">
+          <span>🔒</span>
+          <input type="password" name="password" id="loginPassword" required autocomplete="current-password" />
+          <label for="loginPassword">Password</label>
+        </div>
+        <div class="forgot-pass">
+          <a href="#">Forgot password?</a>
+        </div>
+        <button type="submit">Log In</button>
+        <p id="loginError" class="text-red-600 mt-2 text-center hidden" style="color: #ef4444 !important; font-family: 'Poppins', sans-serif;">Invalid username or password.</p>
+      </form>
+      <div class="sign-up">
+        Not a member? <a href="#" id="showSignup">Sign up now</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sign Up Page (hidden initially) -->
+  <section id="signupSection" class="hidden w-full max-w-md">
+    <div class="content">
+      <div class="text">Sign Up</div>
+      <form id="signupForm">
+        <div class="field">
+          <span>👤</span>
+          <input type="text" name="username" id="signupUsername" required autocomplete="new-username" />
+          <label for="signupUsername">Username</label>
+        </div>
+        <div class="field">
+          <span>🔒</span>
+          <input type="password" name="password" id="signupPassword" required autocomplete="new-password" />
+          <label for="signupPassword">Password</label>
+        </div>
+        <div class="field">
+          <span>🔒</span>
+          <input type="password" name="confirmPassword" id="confirmPassword" required autocomplete="new-password" />
+          <label for="confirmPassword">Confirm Password</label>
+        </div>
+        <button type="submit">Register</button>
+        <p id="signupError" class="text-red-600 mt-2 text-center hidden" style="color: #ef4444 !important; font-family: 'Poppins', sans-serif;">Passwords do not match or username taken.</p>
+      </form>
+      <div class="sign-up">
+        Already a member? <a href="#" id="showLogin">Login now</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main App Section (hidden initially) -->
+  <section id="appSection" class="hidden w-full max-w-4xl bg-white rounded-lg shadow p-6 flex flex-col">
+    <header class="mb-6 text-center">
+      <h1 class="text-4xl font-bold text-indigo-700">Pavan Seva</h1>
+      <p class="text-gray-600 mt-1">Manage your shifts and days</p>
+      <div class="mt-4 flex justify-center space-x-4">
+        <button id="logoutBtn" class="rounded px-4 py-2 w-24 btn-rgb-base">Logout</button>
+        <button id="calculatorBtn" class="rounded px-4 py-2 w-24 btn-rgb-base">Calculator</button>
+        <button id="exportPdfBtn" class="rounded px-4 py-2 w-32 btn-rgb-base">Export to PDF</button>
+      </div>
+    </header>
+
+    <!-- Calculator Modal -->
+    <div id="calculatorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-lg shadow-lg p-4 w-80">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold text-indigo-700">Calculator</h3>
+          <button id="closeCalc" class="text-gray-500 hover:text-gray-700 text-xl">&times;</button>
+        </div>
+        <div class="mb-4">
+          <input type="text" id="calcDisplay" readonly class="w-full border border-gray-300 rounded px-3 py-2 text-right text-2xl font-mono bg-gray-100" value="0">
+        </div>
+        <div class="grid grid-cols-4 gap-2">
+          <button class="calc-btn bg-gray-200 hover:bg-gray-300 rounded p-3 font-semibold" data-value="clear">C</button>
+          <button class="calc-btn bg-gray-200 hover:bg-gray-300 rounded p-3 font-semibold" data-value="backspace">⌫</button>
+          <button class="calc-btn bg-gray-200 hover:bg-gray-300 rounded p-3 font-semibold" data-value="/">/</button>
+          <button class="calc-btn bg-indigo-500 text-white hover:bg-indigo-600 rounded p-3 font-semibold" data-value="*">×</button>
+
+          <button class="calc-btn bg-white hover:bg-gray-100 rounded p-3 font-semibold" data-value="7">7</button>
+          <button class="calc-btn bg-white hover:bg-gray-100 rounded p-3 font-semibold" data-value="8">8</button>
+          <button class="calc-btn bg-white hover:bg-gray-100 rounded p-3 font-semibold" data-value="9">9</button>
+          <button class="calc-btn bg-indigo-500 text-white hover:bg-indigo-600 rounded p-3 font-semibold" data-value="-">-</button>
+
+          <button class="calc-btn bg-white hover:bg-gray-100 rounded p-3 font-semibold" data-value="4">4</button>
+          <button class="calc-btn bg-white hover:bg-gray-100 rounded p-3 font-semibold" data-value="5">5</button>
+          <button class="calc-btn bg-white hover:bg-gray-100 rounded p-3 font-semibold" data-value="6">6</button>
+          <button class="calc-btn bg-indigo-500 text-white hover:bg-indigo-600 rounded p-3 font-semibold" data-value="+">+</button>
+
+          <button class="calc-btn bg-white hover:bg-gray-100 rounded p-3 font-semibold" data-value="1">1</button>
+          <button class="calc-btn bg-white hover:bg-gray-100 rounded p-3 font-semibold" data-value="2">2</button>
+          <button class="calc-btn bg-white hover:bg-gray-100 rounded p-3 font-semibold" data-value="3">3</button>
+          <button class="calc-btn bg-green-500 text-white hover:bg-green-600 rounded p-3 font-semibold row-span-2" data-value="=">=</button>
+
+          <button class="calc-btn bg-white hover:bg-gray-100 rounded p-3 font-semibold col-span-2" data-value="0">0</button>
+          <button class="calc-btn bg-white hover:bg-gray-100 rounded p-3 font-semibold" data-value=".">.</button>
+        </div>
+        <div class="mt-4 flex space-x-2">
+          <button id="useInAdvance" class="flex-1 rounded px-3 py-2 btn-rgb-base">Use in Advance</button>
+          <button id="useInDue" class="flex-1 rounded px-3 py-2 btn-rgb-base">Use in Due</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search bar and Month Selector -->
+    <div class="mb-4 flex flex-wrap items-center space-x-2 space-y-2 md:space-y-0">
+      <input
+        type="month"
+        id="monthSelector"
+        class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      />
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Search by name"
+        class="flex-grow border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      />
+      <button
+        id="searchBtn"
+        class="rounded px-4 py-2 btn-rgb-base"
+        type="button"
+      >
+        Search
+      </button>
+      <button
+        id="clearSearchBtn"
+        class="rounded px-4 py-2 btn-rgb-base"
+        type="button"
+      >
+        Clear
+      </button>
+      <button
+        id="recycleBtn"
+        class="rounded px-4 py-2 btn-rgb-base"
+        type="button"
+      >
+        Recycle
+      </button>
+    </div>
+
+    <!-- Form for adding entries -->
+    <form id="entryForm" class="grid grid-cols-1 md:grid-cols-10 gap-4 mb-6">
+      <input type="date" id="date" required class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+      <input type="text" id="name" placeholder="Name (comma-separated for multiple)" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+      <select id="shift" required class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="" disabled selected>Shift</option>
+        <option value="DAY">DAY</option>
+        <option value="NIGHT">NIGHT</option>
+      </select>
+      <select id="day" required class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="" disabled selected>Day</option>
+        <option value="0.5">0.5</option>
+        <option value="1">1</option>
+        <option value="1.5">1.5</option>
+        <option value="2">2</option>
+        <option value="2.5">2.5</option>
+        <option value="3">3</option>
+        <option value="3.5">3.5</option>
+        <option value="4">4</option>
+      </select>
+      <select id="captainName" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="" disabled selected>Select Captain</option>
+        <!-- Captain names will be populated here by JavaScript -->
+      </select>
+      <select id="hall" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <option value="" disabled selected>Select Hall</option>
+        <!-- Hall names will be populated here by JavaScript -->
+      </select>
+      <input type="number" id="advance" placeholder="Advance" min="0" step="0.01" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+      <input type="number" id="due" placeholder="Due" min="0" step="0.01" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+      <button type="submit" class="rounded px-4 py-2 btn-rgb-base">Add Entry</button>
+    </form>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full border border-gray-300 rounded">
+        <thead class="bg-indigo-100 text-indigo-700 font-semibold">
+          <tr>
+            <th class="border border-gray-300 px-3 py-2 text-center w-16">Sr.Number</th>
+            <th class="border border-gray-300 px-3 py-2 text-center w-32">Date</th>
+            <th class="border border-gray-300 px-3 py-2 text-left">Name</th>
+            <th class="border border-gray-300 px-3 py-2 text-center w-24">Shift</th>
+            <th class="border border-gray-300 px-3 py-2 text-center w-20">Day</th>
+            <th class="border border-gray-300 px-3 py-2 text-left">Captain Name</th>
+            <th class="border border-gray-300 px-3 py-2 text-left">Hall</th>
+            <th class="border border-gray-300 px-3 py-2 text-center w-24">Advance</th>
+            <th class="border border-gray-300 px-3 py-2 text-center w-24">Due</th>
+            <th class="border border-gray-300 px-3 py-2 text-center w-32">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody" class="divide-y divide-gray-200"></tbody>
+        <tfoot>
+          <tr class="bg-indigo-50 font-semibold text-indigo-700">
+            <td colspan="7" class="border border-gray-300 px-3 py-2 text-right">Total of Day:</td>
+            <td id="totalDay" class="border border-gray-300 px-3 py-2 text-center">0</td>
+            <td id="totalAdvance" class="border border-gray-300 px-3 py-2 text-center">0</td>
+            <td id="totalDue" class="border border-gray-300 px-3 py-2 text-center">0</td>
+            <td class="border border-gray-300 px-3 py-2"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <!-- Link to external JavaScript file -->
+  <script src="JAVA.js"></script>
+</body>
+</html>
